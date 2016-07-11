@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := rangesha1.c
 LOCAL_STATIC_LIBRARIES := libmincrypt libcutils
 LOCAL_C_INCLUDES := system/core/include
+LOCAL_LDFLAGS := -lrt
 LOCAL_MODULE := rangesha1
 
 include $(BUILD_HOST_EXECUTABLE)

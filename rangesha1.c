@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #define _LARGEFILE64_SOURCE
 #include <sys/types.h>
@@ -11,6 +12,12 @@
 
 #include <cutils/fs.h>
 #include <mincrypt/sha.h>
+
+static time_t getdifftime(time_t start) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return now.tv_sec - start;
+}
 
 #define BLOCKSIZE 4096
 
@@ -85,6 +92,8 @@ char* print_sha1(const uint8_t* digest)
 
 int main(int argc, char *argv[])
 {
+    time_t t = getdifftime(0);
+
     const uint8_t* digest = NULL;
     char *blockdev_filename = argv[1];
 
@@ -103,7 +112,6 @@ int main(int argc, char *argv[])
 
     int i, j;
     for (i = 0; i < rs->count; ++i) {
-        printf("%ld\n", rs->pos[i*2]);
         if (check_lseek(fd, (int64_t)rs->pos[i*2] * BLOCKSIZE, SEEK_SET)) {
             fprintf(stderr, "failed to seek %s: %s", blockdev_filename,
                 strerror(errno));
@@ -124,6 +132,7 @@ int main(int argc, char *argv[])
     close(fd);
 
     printf("%s\n", print_sha1(digest));
+    printf("rangesha1 took %.2lds.\n", getdifftime(t));
 
     return 0;
 }
